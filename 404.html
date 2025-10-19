@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - File Not Found</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cyber-black': '#0a0e17',
+                        'cyber-blue': '#00f0ff',
+                        'cyber-pink': '#ff00ff',
+                        'cyber-green': '#00ff41',
+                        'cyber-purple': '#9d00ff',
+                    },
+                    fontFamily: {
+                        'cyber': ['Orbitron', 'Rajdhani', 'monospace'],
+                    },
+                    animation: {
+                        'glitch': 'glitch 1s infinite',
+                        'pulse-slow': 'pulse 3s infinite',
+                        'flicker': 'flicker 2s infinite',
+                    },
+                    keyframes: {
+                        glitch: {
+                            '0%, 100%': { transform: 'translate(0)' },
+                            '20%': { transform: 'translate(-2px, 2px)' },
+                            '40%': { transform: 'translate(-2px, -2px)' },
+                            '60%': { transform: 'translate(2px, 2px)' },
+                            '80%': { transform: 'translate(2px, -2px)' },
+                        },
+                        flicker: {
+                            '0%, 100%': { opacity: 1 },
+                            '50%': { opacity: 0.7 },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow-neon {
+                text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor, 0 0 20px currentColor;
+            }
+            .border-glow {
+                box-shadow: 0 0 5px currentColor, 0 0 10px currentColor;
+            }
+            .bg-cyber-grid {
+                background-image: linear-gradient(rgba(0, 240, 255, 0.1) 1px, transparent 1px),
+                                  linear-gradient(90deg, rgba(0, 240, 255, 0.1) 1px, transparent 1px);
+                background-size: 20px 20px;
+            }
+            .clip-path-slant {
+                clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+            }
+        }
+        
+        /* Custom styles */
+        body {
+            overflow: auto;
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #0a0e17;
+        }
+        
+        #codeRainCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .error-code {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.1em;
+        }
+        
+        .cyber-button {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+        
+        .cyber-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+        }
+        
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+        }
+        
+        @keyframes scanline {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(100%);
+            }
+        }
+        
+        .static {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        
+        .terminal {
+            background-color: rgba(10, 14, 23, 0.8);
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            border-radius: 5px;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .terminal-header {
+            background: linear-gradient(90deg, #00f0ff, #9d00ff);
+            padding: 0.25rem 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        
+        .terminal-dot-red {
+            background-color: #ff5252;
+        }
+        
+        .terminal-dot-yellow {
+            background-color: #ffd740;
+        }
+        
+        .terminal-dot-green {
+            background-color: #69f0ae;
+        }
+        
+        .terminal-content {
+            padding: 1rem;
+            color: #00ff41;
+        }
+        
+        .typing-animation::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .contact-info {
+            text-align: center;
+            padding: 1rem;
+        }
+        
+        .glitch-text {
+            position: relative;
+        }
+        
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00ff;
+            animation: glitch-anim 2s infinite linear alternate-reverse;
+        }
+        
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: 2px 0 #00f0ff;
+            animation: glitch-anim 3s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+            0% { clip-path: inset(36% 0 65% 0); }
+            20% { clip-path: inset(82% 0 19% 0); }
+            40% { clip-path: inset(43% 0 58% 0); }
+            60% { clip-path: inset(25% 0 76% 0); }
+            80% { clip-path: inset(54% 0 47% 0); }
+            100% { clip-path: inset(58% 0 43% 0); }
+        }
+    </style>
+</head>
+<body class="bg-cyber-black text-white">
+    <!-- Code Rain Background -->
+    <canvas id="codeRainCanvas"></canvas>
+    
+    <!-- Scanline Effect -->
+    <div class="scanline"></div>
+    
+    <!-- Static Effect -->
+    <div class="static"></div>
+    
+    <div class="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative z-10">
+        <!-- Main Content -->
+        <div class="max-w-4xl w-full mx-auto">
+            <!-- Error Code Display -->
+            <div class="text-center mb-12">
+                <h1 class="error-code text-9xl md:text-[12rem] font-bold text-cyber-blue mb-4 glitch-text" data-text="404">404</h1>
+                <h2 class="text-3xl md:text-5xl font-bold mb-6 text-cyber-pink text-shadow-neon animate-pulse-slow">FILE NOT FOUND</h2>
+                <p class="text-xl md:text-2xl text-cyber-green max-w-2xl mx-auto">
+                    The digital path you seek has been corrupted or erased from the mainframe.
+                </p>
+            </div>
+            
+            <!-- Terminal Error Message -->
+            <div class="terminal mb-12 max-w-2xl mx-auto">
+                <div class="terminal-header">
+                    <div class="terminal-dot terminal-dot-red"></div>
+                    <div class="terminal-dot terminal-dot-yellow"></div>
+                    <div class="terminal-dot terminal-dot-green"></div>
+                    <span class="text-xs font-mono ml-2 text-cyber-black">system.exe - Error Report</span>
+                </div>
+                <div class="terminal-content">
+                    <p class="mb-2"><span class="text-cyber-pink">ERROR:</span> 0xDEADBEEF</p>
+                    <p class="mb-2"><span class="text-cyber-blue">LOCATION:</span> /cyber/void/404.exe</p>
+                    <p class="mb-2"><span class="text-cyber-green">DESCRIPTION:</span> Resource not found in the digital matrix</p>
+                    <p class="mb-2"><span class="text-cyber-purple">RECOMMENDATION:</span> Return to main junction and try again</p>
+                    <p class="typing-animation" id="typingText"></p>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+                <a href="#" class="cyber-button px-8 py-3 bg-transparent border-2 border-cyber-blue text-cyber-blue rounded-md text-lg font-bold text-shadow-neon border-glow hover:bg-cyber-blue hover:text-cyber-black transition-all duration-300">
+                    <i class="fa fa-home mr-2"></i> RETURN TO MAINFRAME
+                </a>
+                <a href="#" class="cyber-button px-8 py-3 bg-transparent border-2 border-cyber-pink text-cyber-pink rounded-md text-lg font-bold text-shadow-neon border-glow hover:bg-cyber-pink hover:text-cyber-black transition-all duration-300">
+                    <i class="fa fa-search mr-2"></i> INITIATE SEARCH
+                </a>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="contact-info max-w-md mx-auto text-center">
+                <p class="text-cyber-blue mb-2">
+                    <i class="fa fa-user-circle mr-2"></i> SYSTEM ADMIN: ElectronicMonkey
+                </p>
+                <p class="text-cyber-green">
+                    <i class="fa fa-envelope mr-2"></i> COMMUNICATE: <a href="mailto:electronicmonkey@qq.com" class="underline hover:text-cyber-pink transition-colors duration-300">electronicmonkey@qq.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Code Rain Animation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get canvas element and context
+            const canvas = document.getElementById('codeRainCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions to window size
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Characters for code rain
+            const chars = '你好北京01你好中国01\n';
+            
+            // Font size
+            const fontSize = 16;
+            
+            // Calculate number of columns
+            const columns = Math.floor(canvas.width / fontSize);
+            
+            // Create array to hold the y positions of each column
+            const drops = [];
+            
+            // Initialize drops array with random y positions
+            for (let i = 0; i < columns; i++) {
+                drops[i] = Math.floor(Math.random() * -100);
+            }
+            
+            // Function to draw the code rain
+            function draw() {
+                // Set semi-transparent black background to create trail effect
+                ctx.fillStyle = 'rgba(10, 14, 23, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Set text color and font
+                ctx.fillStyle = '#00ff41';
+                ctx.font = `${fontSize}px monospace`;
+                
+                // Draw each character in the rain
+                for (let i = 0; i < drops.length; i++) {
+                    // Random character from chars array
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    
+                    // Draw the character
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    
+                    // Move the drop down
+                    drops[i]++;
+                    
+                    // Reset drop to top if it goes below the canvas
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                }
+            }
+            
+            // Animation loop
+            function animate() {
+                draw();
+                requestAnimationFrame(animate);
+            }
+            
+            // Start the animation
+            animate();
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                // Recalculate columns and reset drops array
+                const newColumns = Math.floor(canvas.width / fontSize);
+                drops.length = newColumns;
+                
+                for (let i = 0; i < newColumns; i++) {
+                    drops[i] = Math.floor(Math.random() * -100);
+                }
+            });
+            
+            // Typing animation for terminal
+            const typingText = document.getElementById('typingText');
+            const textToType = '> System scan complete. No anomalies detected in user credentials. Redirecting to main interface...';
+            let index = 0;
+            
+            function typeText() {
+                if (index < textToType.length) {
+                    typingText.textContent = textToType.substring(0, index + 1);
+                    index++;
+                    setTimeout(typeText, 50);
+                } else {
+                    // Reset and start over
+                    setTimeout(() => {
+                        index = 0;
+                        typingText.textContent = '';
+                        setTimeout(typeText, 1000);
+                    }, 3000);
+                }
+            }
+            
+            // Start typing animation
+            setTimeout(typeText, 1000);
+            
+            // Button click effects
+            const buttons = document.querySelectorAll('.cyber-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('absolute', 'rounded-full', 'bg-white', 'opacity-30', 'animate-ping');
+                    
+                    // Position ripple at click location
+                    const rect = button.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    ripple.style.width = ripple.style.height = Math.max(rect.width, rect.height) + 'px';
+                    ripple.style.left = x - (parseInt(ripple.style.width) / 2) + 'px';
+                    ripple.style.top = y - (parseInt(ripple.style.height) / 2) + 'px';
+                    
+                    button.appendChild(ripple);
+                    
+                    // Remove ripple after animation
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 1000);
+                    
+                    // If return to mainframe button is clicked
+                    if (this.querySelector('.fa-home')) {
+                        // Create glitch effect on page
+                        document.body.classList.add('animate-glitch');
+                        setTimeout(() => {
+                            document.body.classList.remove('animate-glitch');
+                            // Here you would typically redirect to the homepage
+                            alert('Redirecting to mainframe...');
+                        }, 1000);
+                    }
+                    
+                    // If search button is clicked
+                    if (this.querySelector('.fa-search')) {
+                        // Create scanning effect
+                        const scanEffect = document.createElement('div');
+                        scanEffect.classList.add('fixed', 'top-0', 'left-0', 'w-full', 'h-16', 'bg-cyber-blue', 'opacity-30', 'z-50');
+                        scanEffect.style.animation = 'scanline 2s linear';
+                        document.body.appendChild(scanEffect);
+                        
+                        setTimeout(() => {
+                            scanEffect.remove();
+                            alert('Searching for digital path...');
+                        }, 2000);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
